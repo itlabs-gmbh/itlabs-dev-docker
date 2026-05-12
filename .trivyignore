@@ -1,0 +1,4 @@
+# CVE-2026-33671: picomatch ReDoS – transitive dep of @anthropic-ai/claude-code
+# Fixed in picomatch 4.0.4/3.0.2/2.3.2, but not yet updated upstream in claude-code.
+# Re-evaluate when claude-code ships an updated dependency.
+CVE-2026-33671
