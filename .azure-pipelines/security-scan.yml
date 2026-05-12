@@ -135,14 +135,13 @@ stages:
                 -v "$(Build.SourcesDirectory):/workspace" \
                 aquasec/trivy:latest \
                 image \
-                  --exit-code 1 \
+                  --exit-code 0 \
                   --severity HIGH,CRITICAL \
                   --ignore-unfixed \
                   --format sarif \
                   --output /workspace/trivy-high-critical.sarif \
                   $(FULL_IMAGE)
-            displayName: Trivy Scan (HIGH/CRITICAL – fail on patchable findings)
-            continueOnError: true
+            displayName: Trivy Scan (HIGH/CRITICAL – generate SARIF)
 
           - task: PublishBuildArtifacts@1
             inputs:
@@ -157,6 +156,17 @@ stages:
               artifactName: trivy-high-critical-sarif
             displayName: Publish Trivy HIGH/CRITICAL SARIF
             condition: always()
+
+          - script: |
+              docker run --rm \
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                aquasec/trivy:latest \
+                image \
+                  --exit-code 1 \
+                  --severity HIGH,CRITICAL \
+                  --ignore-unfixed \
+                  $(FULL_IMAGE)
+            displayName: Trivy Scan (HIGH/CRITICAL – fail on patchable findings)
 
   # ─────────────────────────────────────────────────────────────────────────────
   # Stage 3 – Multiarch build (amd64 + arm64) & push to ACR
