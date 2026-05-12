@@ -7,7 +7,7 @@ FROM ubuntu:24.04
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Europe/Vienna
+ENV TZ=Europe/Berlin
 
 # ── System packages ───────────────────────────────────────────────────────────
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
