@@ -2,6 +2,52 @@
 
 Ein Docker-Container mit allem, was für die itlabs-Entwicklung benötigt wird.
 
+---
+
+## 🚀 Schnellstart (für alle – kein technisches Vorwissen nötig)
+
+### Schritt 1 – Voraussetzungen installieren
+
+Einmalig installieren, falls noch nicht vorhanden:
+
+| Tool                                                              | Download                                        |
+| ----------------------------------------------------------------- | ----------------------------------------------- |
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | https://www.docker.com/products/docker-desktop/ |
+| [Azure CLI](https://aka.ms/installazurecliwindows)                | https://aka.ms/installazurecliwindows           |
+
+> **Wichtig:** Docker Desktop nach der Installation starten und sicherstellen, dass es läuft (Whale-Icon in der Taskleiste).
+
+### Schritt 2 – Installer ausführen
+
+**Windows** – PowerShell als normaler Benutzer öffnen und ausführen:
+
+```powershell
+irm https://dev.azure.com/itlabsde/Konexi/_apis/git/repositories/itlabs-dev-docker/items?path=install.ps1&versionDescriptor.version=main&api-version=7.1 | iex
+```
+
+**macOS / Linux** – Terminal öffnen und ausführen:
+
+```bash
+bash <(curl -fsSL "https://dev.azure.com/itlabsde/Konexi/_apis/git/repositories/itlabs-dev-docker/items?path=install.sh&versionDescriptor.version=main&api-version=7.1")
+```
+
+> Ein Browser-Fenster öffnet sich für den Azure Login – dort mit dem itlabs-Account anmelden. Der Rest läuft automatisch.
+
+### Nächstes Mal starten
+
+```powershell
+# Windows
+cd $env:USERPROFILE\itlabs-dev
+docker compose run --rm dev
+```
+
+```bash
+# macOS / Linux
+cd ~/itlabs-dev && docker compose run --rm dev
+```
+
+---
+
 ## Enthält
 
 | Tool                                               | Version                               |

@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Configuration – adjust to your ACR
 # ─────────────────────────────────────────────────────────────────────────────
-ACR_NAME     ?= yourregistry          # Azure Container Registry name (without .azurecr.io)
+ACR_NAME     ?= itlabscr               # Azure Container Registry name (without .azurecr.io)
 ACR_HOST     := $(ACR_NAME).azurecr.io
 IMAGE_NAME   := itlabs-dev
 IMAGE_TAG    ?= latest

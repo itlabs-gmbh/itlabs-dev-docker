@@ -1,13 +1,6 @@
 services:
   dev:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        USERNAME: dev
-        USER_UID: 1000
-        USER_GID: 1000
-    image: itlabs-dev:local
+    image: itlabscr.azurecr.io/itlabs-dev:latest
     container_name: itlabs-dev
     stdin_open: true
     tty: true
