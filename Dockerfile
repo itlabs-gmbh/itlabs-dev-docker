@@ -38,6 +38,7 @@ ENV LC_ALL=en_US.UTF-8
 
 # ── Azure CLI ─────────────────────────────────────────────────────────────────
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash \
+    && /opt/az/bin/python3 -m pip install --upgrade "urllib3>=2.7.0" \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Create non-root developer user ───────────────────────────────────────────
@@ -77,7 +78,8 @@ RUN mkdir -p "${NVM_DIR}" \
 
 # ── Claude Code & global bin symlinks ───────────────────────────────────────
 RUN . "${NVM_DIR}/nvm.sh" \
-    && npm install -g @anthropic-ai/claude-code
+    && npm install -g @anthropic-ai/claude-code \
+    && npm install -g picomatch@latest
 
 # Symlink node/npm/claude into /usr/local/bin + claude-itlabs wrapper (requires root)
 USER root
