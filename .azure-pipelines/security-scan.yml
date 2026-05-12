@@ -14,7 +14,8 @@ pr:
     include:
       - main
 
-pool: Default
+pool: 
+  vmImage: 'ubuntu-latest'
 
 # ── Shared variables ──────────────────────────────────────────────────────────
 variables:
