@@ -37,9 +37,13 @@ ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
 # ── Azure CLI ─────────────────────────────────────────────────────────────────
-RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash \
-    && /opt/az/bin/python3 -m pip install --upgrade "urllib3>=2.7.0" \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3 python3-pip python3-venv \
+    && rm -rf /var/lib/apt/lists/* \
+    && python3 -m venv /opt/az \
+    && /opt/az/bin/pip install --upgrade pip \
+    && /opt/az/bin/pip install "azure-cli" "urllib3>=2.7.0" \
+    && ln -sf /opt/az/bin/az /usr/local/bin/az
 
 # ── Create non-root developer user ───────────────────────────────────────────
 ARG USERNAME=dev
