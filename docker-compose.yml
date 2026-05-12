@@ -1,0 +1,32 @@
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USERNAME: dev
+        USER_UID: 1000
+        USER_GID: 1000
+    image: itlabs-dev:local
+    container_name: itlabs-dev
+    stdin_open: true
+    tty: true
+    # Mount your local project folder into the container
+    volumes:
+      # Persist home dir: SSH keys, .npmrc, .itlabs-setup-done survive container restarts
+      - dev-home:/home/dev
+      - ./workspace:/home/dev/workspace
+      # Optional: persist git credentials
+      - ~/.gitconfig:/home/dev/.gitconfig:ro
+      # Optional: forward SSH agent for git over SSH
+      - ${SSH_AUTH_SOCK:-/dev/null}:/ssh-agent
+    environment:
+      - SSH_AUTH_SOCK=/ssh-agent
+      # Set your git identity here or use the mounted .gitconfig above
+      # - GIT_AUTHOR_NAME=Max Mustermann
+      # - GIT_AUTHOR_EMAIL=max@example.com
+      - ANTHROPIC_BASE_URL=https://inference.internal.halloalberta.de
+      - ANTHROPIC_AUTH_TOKEN=***REMOVED***
+
+volumes:
+  dev-home:
