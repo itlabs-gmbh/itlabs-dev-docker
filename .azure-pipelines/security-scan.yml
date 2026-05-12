@@ -185,6 +185,7 @@ stages:
 
       - job: MultiarchPush
         displayName: buildx → linux/amd64 + linux/arm64 → ACR
+        pool: Default
         steps:
           - checkout: self
 
