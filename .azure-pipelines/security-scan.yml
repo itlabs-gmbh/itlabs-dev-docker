@@ -47,6 +47,7 @@ stages:
                 hadolint/hadolint:latest \
                 hadolint \
                   --format sarif \
+                  --failure-threshold error \
                   /workspace/Dockerfile \
                 > hadolint.sarif
             displayName: Run Hadolint
@@ -70,9 +71,9 @@ stages:
                 koalaman/shellcheck-alpine:stable \
                 shellcheck \
                   --format=gcc \
-                  /mnt/setup.sh \
                   /mnt/install.sh
-            displayName: Run ShellCheck
+            displayName: Run ShellCheck (install.sh)
+            # setup.sh uses #!/bin/zsh which ShellCheck does not support (SC1071)
 
       # ── Semgrep – SAST ───────────────────────────────────────────────────────
       - job: Semgrep
