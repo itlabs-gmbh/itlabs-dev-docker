@@ -22,7 +22,7 @@ variables:
   ACR_HOST: itlabscr.azurecr.io
   ACR_NAME: itlabscr
   # Name of the Azure Container Registry service connection in ADO
-  ACR_SERVICE_CONNECTION: itlabscr-service-connection
+  ACR_SERVICE_CONNECTION: itlabscr-1955
   IMAGE_NAME: itlabs-dev
   IMAGE_TAG: $(Build.BuildId)
   FULL_IMAGE: $(ACR_HOST)/$(IMAGE_NAME):$(IMAGE_TAG)
