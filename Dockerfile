@@ -79,7 +79,7 @@ RUN mkdir -p "${NVM_DIR}" \
 # ── Claude Code & global bin symlinks ───────────────────────────────────────
 RUN . "${NVM_DIR}/nvm.sh" \
     && npm install -g @anthropic-ai/claude-code \
-    && npm install -g picomatch@latest
+    && npm install -g picomatch@4.0.4
 
 # Symlink node/npm/claude into /usr/local/bin + claude-itlabs wrapper (requires root)
 USER root
