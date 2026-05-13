@@ -1,7 +1,8 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Configuration – adjust to your ACR
 # ─────────────────────────────────────────────────────────────────────────────
-ACR_NAME     ?= itlabscr               # Azure Container Registry name (without .azurecr.io)
+ACR_NAME     ?= itlabscr
+# Azure Container Registry name (without .azurecr.io)
 ACR_HOST     := $(ACR_NAME).azurecr.io
 IMAGE_NAME   := itlabs-dev
 IMAGE_TAG    ?= latest
@@ -10,7 +11,7 @@ FULL_IMAGE   := $(ACR_HOST)/$(IMAGE_NAME):$(IMAGE_TAG)
 # ─────────────────────────────────────────────────────────────────────────────
 # Targets
 # ─────────────────────────────────────────────────────────────────────────────
-.PHONY: build push pull login run shell help
+.PHONY: build buildx push pull login run shell help
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -24,6 +25,14 @@ build: ## Build the Docker image locally
 	  --tag $(IMAGE_NAME):$(IMAGE_TAG) \
 	  --tag $(FULL_IMAGE) \
 	  .
+
+buildx: login ## Build and push multiarch image (amd64 + arm64) to ACR
+	docker buildx build \
+	  --platform linux/amd64,linux/arm64 \
+	  --tag $(FULL_IMAGE) \
+	  --push \
+	  .
+	@echo "✅  Pushed multiarch: $(FULL_IMAGE)"
 
 push: login build ## Build and push image to ACR
 	docker push $(FULL_IMAGE)

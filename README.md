@@ -28,7 +28,7 @@ irm https://dev.azure.com/itlabsde/Konexi/_apis/git/repositories/itlabs-dev-dock
 **macOS / Linux** – Terminal öffnen und ausführen:
 
 ```bash
-bash <(curl -fsSL "https://dev.azure.com/itlabsde/Konexi/_apis/git/repositories/itlabs-dev-docker/items?path=install.sh&versionDescriptor.version=main&api-version=7.1")
+curl -fsSL "https://dev.azure.com/itlabsde/Konexi/_apis/git/repositories/itlabs-dev-docker/items?path=install.sh&versionDescriptor.version=main&api-version=7.1" | bash
 ```
 
 > Ein Browser-Fenster öffnet sich für den Azure Login – dort mit dem itlabs-Account anmelden. Der Rest läuft automatisch.
