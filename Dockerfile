@@ -92,13 +92,13 @@ RUN NODE_BIN="$(ls -d /home/dev/.nvm/versions/node/*/bin | tail -1)" \
     && ln -sf "${NODE_BIN}/npm"    /usr/local/bin/npm \
     && ln -sf "${NODE_BIN}/npx"    /usr/local/bin/npx \
     && ln -sf "${NODE_BIN}/claude" /usr/local/bin/claude \
-    && printf '#!/bin/sh\nexec claude --model qwen/qwen3.6-35b-a3b "$@"\n' \
+    && printf '#!/bin/sh\nANTHROPIC_BASE_URL="${ITLABS_ANTHROPIC_BASE_URL}" ANTHROPIC_AUTH_TOKEN="${ITLABS_ANTHROPIC_AUTH_TOKEN}" exec claude --model qwen/qwen3.6-35b-a3b "$@"\n' \
     > /usr/local/bin/claude-itlabs \
     && chmod +x /usr/local/bin/claude-itlabs
 USER dev
 
 RUN echo '\n# nvm' >> /home/${USERNAME}/.zshrc \
-    && echo 'alias claude-itlabs="claude --model qwen/qwen3.6-35b-a3b"' >> /home/${USERNAME}/.zshrc \
+    && echo 'alias claude-itlabs="ANTHROPIC_BASE_URL=\"\${ITLABS_ANTHROPIC_BASE_URL}\" ANTHROPIC_AUTH_TOKEN=\"\${ITLABS_ANTHROPIC_AUTH_TOKEN}\" claude --model qwen/qwen3.6-35b-a3b"' >> /home/${USERNAME}/.zshrc \
     && echo '\n# First-run setup' >> /home/${USERNAME}/.zshrc \
     && echo 'source /usr/local/bin/itlabs-setup' >> /home/${USERNAME}/.zshrc \
     && printf '# nvm (loaded for all shell modes)\nexport NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"\n[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"\n' \
@@ -109,7 +109,8 @@ RUN echo '\n# nvm' >> /home/${USERNAME}/.zshrc \
 WORKDIR /home/${USERNAME}/workspace
 
 # ── Inference server configuration (values injected via docker-compose / -e) ──
-ENV ANTHROPIC_BASE_URL=""
+# ITLABS_ANTHROPIC_BASE_URL and ITLABS_ANTHROPIC_AUTH_TOKEN are only used by the
+# claude-itlabs wrapper and are NOT exposed to the plain `claude` command.
 
 # ── Entrypoint ────────────────────────────────────────────────────────────────
 CMD ["/bin/zsh", "-i"]

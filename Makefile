@@ -1,44 +1,31 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Configuration – adjust to your ACR
+# Configuration
 # ─────────────────────────────────────────────────────────────────────────────
-ACR_NAME     ?= itlabscr
-# Azure Container Registry name (without .azurecr.io)
-ACR_HOST     := $(ACR_NAME).azurecr.io
+GHCR_HOST    := ghcr.io/itlabs-gmbh
 IMAGE_NAME   := itlabs-dev
 IMAGE_TAG    ?= latest
-FULL_IMAGE   := $(ACR_HOST)/$(IMAGE_NAME):$(IMAGE_TAG)
+FULL_IMAGE   := $(GHCR_HOST)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Targets
 # ─────────────────────────────────────────────────────────────────────────────
-.PHONY: build buildx push pull login run shell help
+.PHONY: build push pull run shell help
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 	  awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
-login: ## Log in to Azure Container Registry (requires az CLI)
-	az acr login --name $(ACR_NAME)
-
 build: ## Build the Docker image locally
 	docker build \
 	  --tag $(IMAGE_NAME):$(IMAGE_TAG) \
-	  --tag $(FULL_IMAGE) \
 	  .
 
-buildx: login ## Build and push multiarch image (amd64 + arm64) to ACR
-	docker buildx build \
-	  --platform linux/amd64,linux/arm64 \
-	  --tag $(FULL_IMAGE) \
-	  --push \
-	  .
-	@echo "✅  Pushed multiarch: $(FULL_IMAGE)"
-
-push: login build ## Build and push image to ACR
+push: build ## Build and push image to GHCR (requires docker login ghcr.io)
+	docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(FULL_IMAGE)
 	docker push $(FULL_IMAGE)
 	@echo "✅  Pushed: $(FULL_IMAGE)"
 
-pull: login ## Pull latest image from ACR
+pull: ## Pull latest image from GHCR
 	docker pull $(FULL_IMAGE)
 
 run: ## Start an interactive container (uses docker compose)

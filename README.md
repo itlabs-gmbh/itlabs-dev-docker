@@ -13,7 +13,6 @@ Einmalig installieren, falls noch nicht vorhanden:
 | Tool                                                              | Download                                        |
 | ----------------------------------------------------------------- | ----------------------------------------------- |
 | [Docker Desktop](https://www.docker.com/products/docker-desktop/) | https://www.docker.com/products/docker-desktop/ |
-| [Azure CLI](https://aka.ms/installazurecliwindows)                | https://aka.ms/installazurecliwindows           |
 
 > **Wichtig:** Docker Desktop nach der Installation starten und sicherstellen, dass es läuft (Whale-Icon in der Taskleiste).
 
@@ -22,16 +21,14 @@ Einmalig installieren, falls noch nicht vorhanden:
 **Windows** – PowerShell als normaler Benutzer öffnen und ausführen:
 
 ```powershell
-irm https://dev.azure.com/itlabsde/Konexi/_apis/git/repositories/itlabs-dev-docker/items?path=install.ps1&versionDescriptor.version=main&api-version=7.1 | iex
+iex (iwr -useb 'https://raw.githubusercontent.com/itlabs-gmbh/itlabs-dev-docker/main/install.ps1').Content
 ```
 
 **macOS / Linux** – Terminal öffnen und ausführen:
 
 ```bash
-curl -fsSL "https://dev.azure.com/itlabsde/Konexi/_apis/git/repositories/itlabs-dev-docker/items?path=install.sh&versionDescriptor.version=main&api-version=7.1" | bash
+curl -fsSL 'https://raw.githubusercontent.com/itlabs-gmbh/itlabs-dev-docker/main/install.sh' | bash
 ```
-
-> Ein Browser-Fenster öffnet sich für den Azure Login – dort mit dem itlabs-Account anmelden. Der Rest läuft automatisch.
 
 ### Nächstes Mal starten
 
@@ -77,17 +74,17 @@ cd ~/itlabs-dev && docker compose run --rm dev
 ### 1. Repository klonen
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/itlabs-gmbh/itlabs-dev-docker.git
 cd itlabs-dev-docker
 ```
 
-### 2. Container bauen und starten
+### 2. Container starten
 
 ```bash
 make run
 ```
 
-Das Image wird beim ersten Aufruf automatisch lokal gebaut. Der `workspace/`-Ordner im Repository wird in den Container gemountet.
+Das Image wird automatisch von GHCR gepullt. Der `workspace/`-Ordner im Repository wird in den Container gemountet.
 
 ---
 
@@ -130,20 +127,12 @@ git config --global user.email "dein@email.com"
 
 ## Für Maintainer: Image bauen und pushen
 
-### Einmalige Konfiguration
+Das Image wird automatisch über GitHub Actions bei jedem Push auf `main` gebaut und nach `ghcr.io/itlabs-gmbh/itlabs-dev:latest` gepusht.
 
-Passe in der `Makefile` den `ACR_NAME` an:
-
-```makefile
-ACR_NAME ?= yourregistry   # ← hier den echten Registry-Namen eintragen
-```
-
-### Build & Push
+Lokal bauen (für Tests):
 
 ```bash
-make push
-# oder mit explizitem Tag:
-make push IMAGE_TAG=1.0.0
+make build
 ```
 
 ### Alle Make-Targets
