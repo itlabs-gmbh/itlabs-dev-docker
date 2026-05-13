@@ -199,8 +199,8 @@ stages:
           # Enable QEMU for cross-platform emulation (arm64 on amd64 host)
           - script: |
               docker run --rm --privileged \
-                multiarch/qemu-user-static \
-                --reset -p yes
+                tonistiigi/binfmt \
+                --install all
             displayName: Setup QEMU
 
           # Create and activate a buildx builder with multi-platform support
