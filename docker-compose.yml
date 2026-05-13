@@ -1,6 +1,6 @@
 services:
   dev:
-    image: itlabscr.azurecr.io/itlabs-dev:latest
+    image: ghcr.io/itlabs-gmbh/itlabs-dev:latest
     container_name: itlabs-dev
     stdin_open: true
     tty: true

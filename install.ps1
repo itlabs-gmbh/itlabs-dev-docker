@@ -1,18 +1,14 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # itlabs Developer Container – Windows Installer
-# Einmalig ausführen: iex (iwr -useb '<raw-url>/install.ps1').Content
+# Einmalig ausführen: iex (iwr -useb 'https://raw.githubusercontent.com/itlabs-gmbh/itlabs-dev-docker/main/install.ps1').Content
 # ─────────────────────────────────────────────────────────────────────────────
 #Requires -Version 5.1
 
 $ErrorActionPreference = "Stop"
 
-$ACR_NAME       = "itlabscr"
-$IMAGE_NAME     = "itlabs-dev"
-$IMAGE_TAG      = "latest"
-$ADO_ORG        = "itlabsde"
-$ADO_PROJECT    = "Konexi"
-$ADO_REPO       = "itlabs-dev-docker"
-$ADO_BRANCH     = "main"
+$GITHUB_ORG     = "itlabs-gmbh"
+$GITHUB_REPO    = "itlabs-dev-docker"
+$GITHUB_BRANCH  = "main"
 $INSTALL_DIR    = "$env:USERPROFILE\itlabs-dev"
 $COMPOSE_FILE   = "$INSTALL_DIR\docker-compose.yml"
 
@@ -58,14 +54,6 @@ if (-not (Test-CommandExists "docker")) {
     }
 }
 
-if (-not (Test-CommandExists "az")) {
-    $missing += "Azure CLI"
-    Write-Host "  ✗ Azure CLI (az) nicht gefunden" -ForegroundColor Red
-    Write-Host "    → Download: https://aka.ms/installazurecliwindows" -ForegroundColor Gray
-} else {
-    Write-Host "  ✓ Azure CLI gefunden" -ForegroundColor Green
-}
-
 if ($missing.Count -gt 0) {
     Write-Host ""
     Write-Host "Bitte zuerst folgende Tools installieren und danach erneut ausführen:" -ForegroundColor Red
@@ -74,29 +62,7 @@ if ($missing.Count -gt 0) {
     exit 1
 }
 
-# ── 2. Azure Login ─────────────────────────────────────────────────────────────
-Write-Section "Azure Login"
-
-Write-Host "Prüfe ob du bereits eingeloggt bist..."
-$account = $null
-try { $account = az account show 2>$null | ConvertFrom-Json } catch {}
-
-if ($null -eq $account) {
-    Write-Host "Ein Browser-Fenster öffnet sich für den Azure Login..." -ForegroundColor Yellow
-    az login --output none
-    $account = az account show | ConvertFrom-Json
-}
-
-Write-Host "  ✓ Eingeloggt als: $($account.user.name)" -ForegroundColor Green
-
-# ── 3. ACR Login ───────────────────────────────────────────────────────────────
-Write-Section "Azure Container Registry Login"
-
-Write-Host "Verbinde mit ${ACR_NAME}.azurecr.io ..."
-az acr login --name $ACR_NAME
-Write-Host "  ✓ ACR Login erfolgreich" -ForegroundColor Green
-
-# ── 4. docker-compose.yml herunterladen ──────────────────────────────────────
+# ── 2. docker-compose.yml herunterladen ──────────────────────────────────────
 Write-Section "Konfiguration herunterladen"
 
 if (-not (Test-Path $INSTALL_DIR)) {
@@ -113,26 +79,22 @@ if (-not (Test-Path $workspaceDir)) {
     Write-Host "  ✓ workspace-Ordner erstellt: $workspaceDir" -ForegroundColor Green
 }
 
-Write-Host "Lade docker-compose.yml aus Azure DevOps..."
-
-$adoRawUrl = "https://dev.azure.com/$ADO_ORG/$ADO_PROJECT/_apis/git/repositories/$ADO_REPO/items?path=docker-compose.yml&versionDescriptor.version=$ADO_BRANCH&api-version=7.1"
-
-$token = az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken -o tsv
-$headers = @{ Authorization = "Bearer $token" }
+$githubRawUrl = "https://raw.githubusercontent.com/$GITHUB_ORG/$GITHUB_REPO/$GITHUB_BRANCH/docker-compose.yml"
+Write-Host "Lade docker-compose.yml von GitHub..."
 
 try {
-    Invoke-WebRequest -Uri $adoRawUrl -Headers $headers -OutFile $COMPOSE_FILE -UseBasicParsing
+    Invoke-WebRequest -Uri $githubRawUrl -OutFile $COMPOSE_FILE -UseBasicParsing
     Write-Host "  ✓ docker-compose.yml heruntergeladen: $COMPOSE_FILE" -ForegroundColor Green
 } catch {
     Write-Host "  ✗ Download fehlgeschlagen: $_" -ForegroundColor Red
-    Write-Host "    Stelle sicher, dass dein Azure-Account Zugriff auf das ADO-Repo hat." -ForegroundColor Gray
+    Write-Host "    URL: $githubRawUrl" -ForegroundColor Gray
     exit 1
 }
 
-# ── 5. Image pullen ────────────────────────────────────────────────────────────
+# ── 3. Image pullen ──────────────────────────────────────────────────────────────
 Write-Section "Docker Image laden"
 
-Write-Host "Lade Image ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG} ..."
+Write-Host "Lade Image ghcr.io/itlabs-gmbh/itlabs-dev:latest ..."
 Write-Host "(Das kann beim ersten Mal einige Minuten dauern)" -ForegroundColor Gray
 
 Set-Location $INSTALL_DIR
@@ -140,7 +102,7 @@ docker compose pull
 
 Write-Host "  ✓ Image erfolgreich geladen" -ForegroundColor Green
 
-# ── 6. Container starten ───────────────────────────────────────────────────────
+# ── 4. Container starten ───────────────────────────────────────────────────────
 Write-Section "Container starten"
 
 Write-Host "Starte itlabs Developer Container..."

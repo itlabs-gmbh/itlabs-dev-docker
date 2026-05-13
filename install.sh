@@ -2,18 +2,14 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # itlabs Developer Container – macOS / Linux Installer
 # Einmalig ausführen:
-#   bash <(curl -fsSL '<raw-url>/install.sh')
+#   bash <(curl -fsSL 'https://raw.githubusercontent.com/itlabs-gmbh/itlabs-dev-docker/main/install.sh')
 # ─────────────────────────────────────────────────────────────────────────────
 
 set -euo pipefail
 
-ACR_NAME="itlabscr"
-IMAGE_NAME="itlabs-dev"
-IMAGE_TAG="latest"
-ADO_ORG="itlabsde"
-ADO_PROJECT="Konexi"
-ADO_REPO="itlabs-dev-docker"
-ADO_BRANCH="main"
+GITHUB_ORG="itlabs-gmbh"
+GITHUB_REPO="itlabs-dev-docker"
+GITHUB_BRANCH="main"
 INSTALL_DIR="$HOME/itlabs-dev"
 COMPOSE_FILE="$INSTALL_DIR/docker-compose.yml"
 
@@ -59,16 +55,11 @@ else
   fi
 fi
 
-if ! command_exists az; then
-  print_err "Azure CLI (az) nicht gefunden"
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    echo "    → Installation: brew install azure-cli"
-  else
-    echo "    → Download: https://learn.microsoft.com/cli/azure/install-azure-cli"
-  fi
-  MISSING+=("Azure CLI")
+if ! command_exists curl; then
+  print_err "curl nicht gefunden"
+  MISSING+=("curl")
 else
-  print_ok "Azure CLI gefunden"
+  print_ok "curl gefunden"
 fi
 
 if [[ ${#MISSING[@]} -gt 0 ]]; then
@@ -79,26 +70,7 @@ if [[ ${#MISSING[@]} -gt 0 ]]; then
   exit 1
 fi
 
-# ── 2. Azure Login ─────────────────────────────────────────────────────────────
-print_section "Azure Login"
-
-echo "Prüfe ob du bereits eingeloggt bist..."
-if ! az account show &>/dev/null; then
-  echo "Ein Browser-Fenster öffnet sich für den Azure Login..."
-  az login --output none
-fi
-
-ACCOUNT_NAME=$(az account show --query user.name -o tsv)
-print_ok "Eingeloggt als: $ACCOUNT_NAME"
-
-# ── 3. ACR Login ───────────────────────────────────────────────────────────────
-print_section "Azure Container Registry Login"
-
-echo "Verbinde mit ${ACR_NAME}.azurecr.io ..."
-az acr login --name "$ACR_NAME"
-print_ok "ACR Login erfolgreich"
-
-# ── 4. docker-compose.yml herunterladen ──────────────────────────────────────
+# ── 2. docker-compose.yml herunterladen ──────────────────────────────────────
 print_section "Konfiguration herunterladen"
 
 mkdir -p "$INSTALL_DIR"
@@ -107,23 +79,21 @@ print_ok "Ordner: $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR/workspace"
 print_ok "workspace-Ordner: $INSTALL_DIR/workspace"
 
-echo "Lade docker-compose.yml aus Azure DevOps..."
+GITHUB_RAW_URL="https://raw.githubusercontent.com/${GITHUB_ORG}/${GITHUB_REPO}/${GITHUB_BRANCH}/docker-compose.yml"
+echo "Lade docker-compose.yml von GitHub..."
 
-ADO_RAW_URL="https://dev.azure.com/${ADO_ORG}/${ADO_PROJECT}/_apis/git/repositories/${ADO_REPO}/items?path=docker-compose.yml&versionDescriptor.version=${ADO_BRANCH}&api-version=7.1"
-TOKEN=$(az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken -o tsv)
-
-if ! curl -fsSL -H "Authorization: Bearer $TOKEN" "$ADO_RAW_URL" -o "$COMPOSE_FILE"; then
+if ! curl -fsSL "$GITHUB_RAW_URL" -o "$COMPOSE_FILE"; then
   print_err "Download fehlgeschlagen"
-  echo "    Stelle sicher, dass dein Azure-Account Zugriff auf das ADO-Repo hat."
+  echo "    URL: $GITHUB_RAW_URL"
   exit 1
 fi
 
 print_ok "docker-compose.yml heruntergeladen: $COMPOSE_FILE"
 
-# ── 5. Image pullen ────────────────────────────────────────────────────────────
+# ── 3. Image pullen ────────────────────────────────────────────────────────────
 print_section "Docker Image laden"
 
-echo "Lade Image ${ACR_NAME}.azurecr.io/${IMAGE_NAME}:${IMAGE_TAG} ..."
+echo "Lade Image ghcr.io/itlabs-gmbh/itlabs-dev:latest ..."
 echo "(Das kann beim ersten Mal einige Minuten dauern)"
 
 cd "$INSTALL_DIR"
@@ -131,7 +101,7 @@ docker compose pull
 
 print_ok "Image erfolgreich geladen"
 
-# ── 6. Container starten ───────────────────────────────────────────────────────
+# ── 4. Container starten ───────────────────────────────────────────────────────
 print_section "Container starten"
 
 echo ""
