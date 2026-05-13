@@ -18,8 +18,8 @@ services:
       # Set your git identity here or use the mounted .gitconfig above
       # - GIT_AUTHOR_NAME=Max Mustermann
       # - GIT_AUTHOR_EMAIL=max@example.com
-      - ANTHROPIC_BASE_URL=https://inference.internal.halloalberta.de
-      - ANTHROPIC_AUTH_TOKEN=***REMOVED***
+      - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL:-}
+      - ANTHROPIC_AUTH_TOKEN=${ANTHROPIC_AUTH_TOKEN:-}
 
 volumes:
   dev-home:
