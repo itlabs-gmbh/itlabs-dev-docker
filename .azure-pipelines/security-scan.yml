@@ -198,7 +198,7 @@ stages:
 
           # Enable QEMU for cross-platform emulation (arm64 on amd64 host)
           - script: |
-              docker run --rm --privileged \
+              docker run --rm --privileged --pid=host \
                 tonistiigi/binfmt \
                 --install all
             displayName: Setup QEMU
