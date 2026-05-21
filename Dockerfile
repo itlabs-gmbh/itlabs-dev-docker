@@ -23,6 +23,9 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
     unzip \
     zip \
     build-essential \
+    # Editors
+    nano \
+    vim \
     # Shell
     zsh \
     # SSH / networking
@@ -44,6 +47,19 @@ RUN apt-get update \
     && /opt/az/bin/pip install --upgrade pip \
     && /opt/az/bin/pip install "azure-cli" "urllib3>=2.7.0" \
     && ln -sf /opt/az/bin/az /usr/local/bin/az
+
+# ── Go ────────────────────────────────────────────────────────────────────────
+RUN GOVERSION=$(curl -fsSL "https://go.dev/dl/?mode=json" | jq -r '.[0].version') \
+    && curl -fsSL "https://go.dev/dl/${GOVERSION}.linux-amd64.tar.gz" -o /tmp/go.tar.gz \
+    && tar -C /usr/local -xzf /tmp/go.tar.gz \
+    && rm /tmp/go.tar.gz
+ENV PATH="/usr/local/go/bin:${PATH}"
+
+# ── Temporal CLI ──────────────────────────────────────────────────────────────
+RUN TEMPORAL_VERSION=$(curl -fsSL https://api.github.com/repos/temporalio/cli/releases/latest | jq -r '.tag_name') \
+    && curl -fsSL "https://github.com/temporalio/cli/releases/download/${TEMPORAL_VERSION}/temporal_cli_${TEMPORAL_VERSION#v}_linux_amd64.tar.gz" -o /tmp/temporal.tar.gz \
+    && tar -C /usr/local/bin -xzf /tmp/temporal.tar.gz temporal \
+    && rm /tmp/temporal.tar.gz
 
 # ── Create non-root developer user ───────────────────────────────────────────
 ARG USERNAME=dev
@@ -98,7 +114,6 @@ RUN NODE_BIN="$(ls -d /home/dev/.nvm/versions/node/*/bin | tail -1)" \
 USER dev
 
 RUN echo '\n# nvm' >> /home/${USERNAME}/.zshrc \
-    && echo 'alias claude-itlabs="ANTHROPIC_BASE_URL=\"\${ITLABS_ANTHROPIC_BASE_URL}\" ANTHROPIC_AUTH_TOKEN=\"\${ITLABS_ANTHROPIC_AUTH_TOKEN}\" claude --model qwen/qwen3.6-35b-a3b"' >> /home/${USERNAME}/.zshrc \
     && echo '\n# First-run setup' >> /home/${USERNAME}/.zshrc \
     && echo 'source /usr/local/bin/itlabs-setup' >> /home/${USERNAME}/.zshrc \
     && printf '# nvm (loaded for all shell modes)\nexport NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"\n[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"\n' \

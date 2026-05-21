@@ -62,11 +62,11 @@ fi
 if [[ -n "$ADO_PAT" ]]; then
   echo "SSH Key wird automatisch in ADO hinterlegt..."
   PUB_KEY=$(cat "${SSH_KEY}.pub")
-  HTTP_STATUS=$(curl -s -o /tmp/ado_ssh_response.json -w "%{http_code}" \
+  HTTP_STATUS=$(curl -sk -o /tmp/ado_ssh_response.json -w "%{http_code}" \
     -X POST \
     -H "Content-Type: application/json" \
-    -H "Authorization: Basic $(echo -n ":${ADO_PAT}" | base64)" \
-    "https://vssps.dev.azure.com/itlabsde/_apis/ssh?api-version=7.1" \
+    -u ":${ADO_PAT}" \
+    "https://vssps.dev.azure.com/itlabsde/_apis/ssh/publickeys?api-version=7.1-preview.1" \
     -d "{\"publicData\":\"${PUB_KEY}\",\"description\":\"itlabs-dev-container\"}")
 
   if [[ "$HTTP_STATUS" == "200" || "$HTTP_STATUS" == "201" ]]; then
@@ -111,21 +111,19 @@ if [[ ! -f "$NPMRC" ]]; then
     echo "⚠️  Kein PAT vorhanden – .npmrc wird übersprungen."
     echo "    Führe später 'itlabs-setup' aus um nachzuholen."
   else
-    ENCODED_PAT=$(echo -n "$ADO_PAT" | base64)
+    ENCODED_PAT=$(echo -n "$ADO_PAT" | base64 | tr -d '\n')
     cat > "$NPMRC" <<EOF
 ; Azure DevOps Artifacts – generiert von itlabs-setup
-@alberta:registry=https://pkgs.dev.azure.com/itlabsde/_packaging/itlabs/npm/registry/
-
-always-auth=true
+@alberta:registry=https://pkgs.dev.azure.com/itlabsde/_packaging/Alberta/npm/registry/
 
 ; ADO Artifacts Auth
-//pkgs.dev.azure.com/itlabsde/_packaging/itlabs/npm/registry/:username=itlabs
-//pkgs.dev.azure.com/itlabsde/_packaging/itlabs/npm/registry/:_password=${ENCODED_PAT}
-//pkgs.dev.azure.com/itlabsde/_packaging/itlabs/npm/registry/:email=npm@itlabs.at
+//pkgs.dev.azure.com/itlabsde/_packaging/Alberta/npm/registry/:username=itlabsde
+//pkgs.dev.azure.com/itlabsde/_packaging/Alberta/npm/registry/:_password=${ENCODED_PAT}
+//pkgs.dev.azure.com/itlabsde/_packaging/Alberta/npm/registry/:email=npm@itlabs.at
 
-//pkgs.dev.azure.com/itlabsde/_packaging/itlabs/npm/:username=itlabs
-//pkgs.dev.azure.com/itlabsde/_packaging/itlabs/npm/:_password=${ENCODED_PAT}
-//pkgs.dev.azure.com/itlabsde/_packaging/itlabs/npm/:email=npm@itlabs.at
+//pkgs.dev.azure.com/itlabsde/_packaging/Alberta/npm/:username=itlabsde
+//pkgs.dev.azure.com/itlabsde/_packaging/Alberta/npm/:_password=${ENCODED_PAT}
+//pkgs.dev.azure.com/itlabsde/_packaging/Alberta/npm/:email=npm@itlabs.at
 EOF
     echo "✅ .npmrc erstellt: $NPMRC"
   fi

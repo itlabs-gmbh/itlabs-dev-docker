@@ -1,4 +1,4 @@
-# ─────────────────────────────────────────────────────────────────────────────
+﻿# ─────────────────────────────────────────────────────────────────────────────
 # itlabs Developer Container – Windows Installer
 # Einmalig ausführen: iex (iwr -useb 'https://raw.githubusercontent.com/itlabs-gmbh/itlabs-dev-docker/main/install.ps1').Content
 # ─────────────────────────────────────────────────────────────────────────────
@@ -59,7 +59,8 @@ if ($missing.Count -gt 0) {
     Write-Host "Bitte zuerst folgende Tools installieren und danach erneut ausführen:" -ForegroundColor Red
     $missing | ForEach-Object { Write-Host "  • $_" -ForegroundColor Red }
     Write-Host ""
-    exit 1
+    Read-Host "Drücke Enter zum Schließen"
+    return
 }
 
 # ── 2. docker-compose.yml herunterladen ──────────────────────────────────────
@@ -88,7 +89,8 @@ try {
 } catch {
     Write-Host "  ✗ Download fehlgeschlagen: $_" -ForegroundColor Red
     Write-Host "    URL: $githubRawUrl" -ForegroundColor Gray
-    exit 1
+    Read-Host "Drücke Enter zum Schließen"
+    return
 }
 
 # ── 3. Image pullen ──────────────────────────────────────────────────────────────
